@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/cachyos/cachyos-website/main/src/assets/img/logo.svg" alt="CachyOS Logo" width="120" height="120">
+<img src="https://cachyos.org/_astro/logo.DuMERIP6_qzDwT.svg" alt="CachyOS Logo" width="120" height="120">
 
 # CachyOS Headless
 
