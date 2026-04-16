@@ -14,7 +14,7 @@ RUN pacman-key --init && \
     pacman -Sy --noconfirm archlinux-keyring cachyos-keyring && \
     pacman -Syu --noconfirm
 
-# Install XFCE core components individually (NOT as group)
+# Install XFCE and Xorg (removed dbus-x11, xorg-fonts-type1)
 RUN pacman -S --noconfirm --needed \
     xfce4-panel \
     xfce4-session \
@@ -32,13 +32,11 @@ RUN pacman -S --noconfirm --needed \
     xorg-xinit \
     xorg-xrandr \
     xorg-xauth \
-    xorg-fonts-type1 \
     xorg-fonts-encodings \
-    dbus \
-    dbus-x11 && \
+    dbus && \
     rm -rf /var/cache/pacman/pkg/*
 
-# Install fonts
+# Install fonts (removed xorg-fonts-misc equivalent)
 RUN pacman -S --noconfirm --needed \
     ttf-dejavu \
     ttf-liberation \
