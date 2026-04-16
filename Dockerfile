@@ -8,55 +8,91 @@ ENV USER=cachyos \
     PUID=1000 \
     PGID=1000
 
-# Fix: Update keyring first and choose PipeWire over PulseAudio (modern standard)
+# Initialize pacman and update system
 RUN pacman-key --init && \
     pacman-key --populate archlinux cachyos && \
     pacman -Sy --noconfirm archlinux-keyring cachyos-keyring && \
     pacman -Syu --noconfirm
 
-# Install packages in smaller groups to isolate errors
+# Install XFCE desktop (xfce4 is a group, not a package)
 RUN pacman -S --noconfirm --needed \
-    xfce4 xfce4-terminal xfce4-goodies \
-    xorg-server xorg-xinit xorg-xrandr xorg-xauth xorg-fonts-misc \
-    dbus-x11 ttf-dejavu ttf-liberation noto-fonts && \
+    xfce4 \
+    xfce4-terminal \
+    xfce4-taskmanager \
+    xfce4-whiskermenu-plugin \
+    xfce4-pulseaudio-plugin \
+    xorg-server \
+    xorg-xinit \
+    xorg-xrandr \
+    xorg-xauth \
+    xorg-fonts-type1 \
+    xorg-fonts-encodings \
+    dbus \
+    dbus-x11 && \
     rm -rf /var/cache/pacman/pkg/*
 
-# Audio: Use PipeWire (not PulseAudio+PipeWire combo which conflicts)
+# Install fonts
 RUN pacman -S --noconfirm --needed \
-    pipewire pipewire-pulse pipewire-alsa wireplumber \
+    ttf-dejavu \
+    ttf-liberation \
+    ttf-freefont \
+    noto-fonts \
+    noto-fonts-emoji && \
+    rm -rf /var/cache/pacman/pkg/*
+
+# Audio (PipeWire)
+RUN pacman -S --noconfirm --needed \
+    pipewire \
+    pipewire-pulse \
+    pipewire-alsa \
+    wireplumber \
     alsa-utils && \
     rm -rf /var/cache/pacman/pkg/*
 
-# VNC and web interface
+# VNC/Web
 RUN pacman -S --noconfirm --needed \
-    tigervnc x11vnc novnc websockify \
-    supervisor nginx && \
+    tigervnc \
+    x11vnc \
+    novnc \
+    python-websockify \
+    supervisor \
+    nginx && \
     rm -rf /var/cache/pacman/pkg/*
 
-# GPU support (Intel Arc)
+# GPU/Graphics
 RUN pacman -S --noconfirm --needed \
-    mesa libva-mesa-driver intel-media-driver \
-    vulkan-intel vulkan-tools && \
+    mesa \
+    libva-mesa-driver \
+    intel-media-driver \
+    vulkan-intel \
+    vulkan-tools && \
     rm -rf /var/cache/pacman/pkg/*
 
-# System utilities
+# Utilities
 RUN pacman -S --noconfirm --needed \
-    curl wget git sudo nano vim \
-    firefox fuse3 flatpak ca-certificates openssl && \
+    curl \
+    wget \
+    git \
+    sudo \
+    nano \
+    vim \
+    firefox \
+    fuse3 \
+    flatpak \
+    ca-certificates-utils \
+    openssl && \
     rm -rf /var/cache/pacman/pkg/*
 
 # Create user
 RUN useradd -m -s /bin/bash -u 1000 cachyos && \
     echo "cachyos:cachyos" | chpasswd && \
     echo "cachyos ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    usermod -aG audio,video,optical,storage cachyos
-
-# Setup VNC
-RUN mkdir -p /home/cachyos/.vnc && \
+    usermod -aG audio,video,optical,storage cachyos && \
+    mkdir -p /home/cachyos/.vnc && \
     echo "cachyos" | vncpasswd -f > /home/cachyos/.vnc/passwd && \
     chmod 600 /home/cachyos/.vnc/passwd && \
     chown -R cachyos:cachyos /home/cachyos/.vnc && \
-    echo -e '#!/bin/bash\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nexec startxfce4' > /home/cachyos/.vnc/xstartup && \
+    printf '#!/bin/bash\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nexec startxfce4\n' > /home/cachyos/.vnc/xstartup && \
     chmod +x /home/cachyos/.vnc/xstartup && \
     chown cachyos:cachyos /home/cachyos/.vnc/xstartup
 
