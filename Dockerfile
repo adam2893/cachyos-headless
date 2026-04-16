@@ -14,7 +14,7 @@ RUN pacman-key --init && \
     pacman -Sy --noconfirm archlinux-keyring cachyos-keyring && \
     pacman -Syu --noconfirm
 
-# Install XFCE and Xorg (removed dbus-x11, xorg-fonts-type1)
+# Install XFCE and Xorg
 RUN pacman -S --noconfirm --needed \
     xfce4-panel \
     xfce4-session \
@@ -36,7 +36,7 @@ RUN pacman -S --noconfirm --needed \
     dbus && \
     rm -rf /var/cache/pacman/pkg/*
 
-# Install fonts (removed xorg-fonts-misc equivalent)
+# Install fonts
 RUN pacman -S --noconfirm --needed \
     ttf-dejavu \
     ttf-liberation \
@@ -54,15 +54,23 @@ RUN pacman -S --noconfirm --needed \
     alsa-utils && \
     rm -rf /var/cache/pacman/pkg/*
 
-# VNC/Web
+# VNC/Web - Removed novnc and python-websockify (not in repos)
 RUN pacman -S --noconfirm --needed \
     tigervnc \
     x11vnc \
-    novnc \
-    python-websockify \
     supervisor \
-    nginx && \
+    nginx \
+    python \
+    python-pip \
+    git && \
     rm -rf /var/cache/pacman/pkg/*
+
+# Install noVNC and websockify via pip (not in pacman repos)
+RUN pip3 install --break-system-packages websockify && \
+    mkdir -p /usr/share/novnc && \
+    git clone --depth 1 https://github.com/novnc/noVNC.git /usr/share/novnc && \
+    ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
+    rm -rf /usr/share/novnc/.git
 
 # GPU/Graphics
 RUN pacman -S --noconfirm --needed \
@@ -77,7 +85,6 @@ RUN pacman -S --noconfirm --needed \
 RUN pacman -S --noconfirm --needed \
     curl \
     wget \
-    git \
     sudo \
     nano \
     vim \
