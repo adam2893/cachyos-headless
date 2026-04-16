@@ -14,13 +14,20 @@ RUN pacman-key --init && \
     pacman -Sy --noconfirm archlinux-keyring cachyos-keyring && \
     pacman -Syu --noconfirm
 
-# Install XFCE desktop (xfce4 is a group, not a package)
+# Install XFCE core components individually (NOT as group)
 RUN pacman -S --noconfirm --needed \
-    xfce4 \
+    xfce4-panel \
+    xfce4-session \
+    xfce4-settings \
     xfce4-terminal \
-    xfce4-taskmanager \
-    xfce4-whiskermenu-plugin \
-    xfce4-pulseaudio-plugin \
+    xfwm4 \
+    xfdesktop \
+    xfce4-appfinder \
+    xfce4-power-manager \
+    thunar \
+    thunar-volman \
+    tumbler \
+    gvfs \
     xorg-server \
     xorg-xinit \
     xorg-xrandr \
