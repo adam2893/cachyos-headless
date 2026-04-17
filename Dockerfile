@@ -80,6 +80,7 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 VOLUME ["/home/cachyos", "/mnt/games"]
-EXPOSE 5901 8080 47984-48000/udp  # Sunshine ports added
+# Sunshine UDP ports (for Moonlight streaming)
+EXPOSE 5901 8080 47984-48000/udp
 WORKDIR /home/cachyos
 ENTRYPOINT ["/start.sh"]
