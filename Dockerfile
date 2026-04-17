@@ -1,16 +1,3 @@
-# ============================================================
-# Diagnostic Dockerfile — CachyOS Headless
-# ============================================================
-# This file installs packages ONE AT A TIME with echo markers
-# so you can see exactly which package fails in the build log.
-#
-# Run with:  docker build --progress=plain -t cachyos-test .
-#
-# When a step fails, search the log for "=== FAILED ===" to
-# find the last successful package, then the next one is the
-# one that broke.  Report back and we'll fix it.
-# ============================================================
-
 FROM cachyos/cachyos-v3:latest
 
 ENV USER=cachyos \
@@ -97,9 +84,9 @@ RUN echo "=== [11/18] pipewire + pipewire-pulse + pipewire-alsa + wireplumber + 
     echo "=== [11/18] DONE ==="
 
 # ---- 12: VNC server ----
-RUN echo "=== [12/18] tigervnc + supervisor ===" && \
-    pacman -S --noconfirm --needed tigervnc supervisor && \
-    echo "=== [12/18] DONE ==="  
+RUN echo "=== [12/18] tigervnc ===" && \
+    pacman -S --noconfirm --needed tigervnc && \
+    echo "=== [12/18] DONE ==="
 
 # ---- 13: GPU / Graphics ----
 RUN echo "=== [13/18] mesa + libva-mesa-driver + intel-media-driver + vulkan-intel + vulkan-tools ===" && \
@@ -147,28 +134,17 @@ RUN echo "=== [17/18] python + python-pip + websockify (venv) + noVNC (v1.5.0) =
     rm -rf /usr/share/novnc/.git && \
     echo "=== [17/18] DONE ==="
 
-# ---- 18: User + VNC config + entrypoint ----
-RUN echo "=== [18/18] Create user, copy configs ===" && \
+# ---- 18: Create user ----
+RUN echo "=== [18/18] Create user ===" && \
     useradd -m -s /bin/bash -u 1000 cachyos && \
     echo "cachyos:cachyos" | chpasswd && \
     echo "cachyos ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     usermod -aG audio,video,optical,storage cachyos && \
-    mkdir -p /home/cachyos/.vnc && \
-    chown -R cachyos:cachyos /home/cachyos/.vnc && \
-    printf '#!/bin/bash\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nexec startxfce4\n' \
-        > /home/cachyos/.vnc/xstartup && \
-    chmod +x /home/cachyos/.vnc/xstartup && \
-    chown cachyos:cachyos /home/cachyos/.vnc/xstartup && \
-    mkdir -p /var/log/supervisor /etc/supervisor/conf.d && \
     echo "=== [18/18] DONE ==="
 
-# Copy runtime configs
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy entrypoint
 COPY start.sh /start.sh
-COPY vnc-start.sh /usr/local/bin/vnc-start.sh
-COPY xfce-start.sh /usr/local/bin/xfce-start.sh
-COPY pipewire-start.sh /usr/local/bin/pipewire-start.sh
-RUN chmod +x /start.sh /usr/local/bin/vnc-start.sh /usr/local/bin/xfce-start.sh /usr/local/bin/pipewire-start.sh
+RUN chmod +x /start.sh
 
 VOLUME ["/home/cachyos", "/mnt/games"]
 EXPOSE 5901 8080
