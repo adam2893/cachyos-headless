@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cachyos/cachyos-iso/main/cachyos-logo.png" alt="CachyOS" width="120"/>
+  <img src="https://cachyos.org/_astro/logo.DuMERIP6_qzDwT.svg" alt="CachyOS" width="120"/>
 </p>
 
 <h1 align="center">CachyOS Headless</h1>
