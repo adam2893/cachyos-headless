@@ -58,9 +58,11 @@ RUN echo "=== [16/19] fuse3 + flatpak + ca-certificates-utils + openssl ===" && 
     pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && \
     echo "=== [16/19] DONE ==="
 
-# ---- 17: Gaming packages (Steam + Sunshine) + gnome-software ----
-RUN echo "=== [17/19] Steam + Sunshine + gnome-software ===" && \
-    pacman -S --noconfirm --needed steam sunshine gnome-software && \
+# ---- 17: Steam + gnome-software (force remove mesa-git conflict) ----
+RUN echo "=== [17/19] Steam + gnome-software ===" && \
+    pacman -Rdd --noconfirm mesa-git vulkan-mesa-implicit-layers 2>/dev/null || true && \
+    pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed steam gnome-software && \
     echo "=== [17/19] DONE ==="
 
 # ---- 18: Create user ----
