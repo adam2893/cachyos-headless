@@ -36,6 +36,13 @@ RUN echo "=== [9/20] dbus + dbus-glib ===" && pacman -S --noconfirm --needed dbu
 RUN echo "=== [10/20] fonts + noto + ttf-dejavu + ttf-liberation ===" && pacman -S --noconfirm --needed noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-liberation && echo "=== [10/20] DONE ==="
 RUN echo "=== [11/20] pipewire + alsa + pulse + wireplumber ===" && pacman -S --noconfirm --needed pipewire pipewire-alsa pipewire-pulse wireplumber alsa-utils && echo "=== [11/20] DONE ==="
 RUN echo "=== [12/20] tigervnc ===" && pacman -S --noconfirm --needed tigervnc && echo "=== [12/20] DONE ==="
+# ---- noVNC Python venv (websockify) ----
+RUN echo "=== [noVNC] Setting up Python venv for websockify ===" && \
+    pacman -S --noconfirm --needed python python-pip python-venv && \
+    mkdir -p /opt/noVNC-env && \
+    python -m venv /opt/noVNC-env && \
+    /opt/noVNC-env/bin/pip install --no-cache-dir websockify && \
+    echo "=== [noVNC] DONE ==="
 RUN echo "=== [13/20] GPU extras (libva + intel-media + vulkan) ===" && pacman -S --noconfirm --needed libva-mesa-driver intel-media-driver vulkan-icd-loader libva-utils mesa-utils nvtop && echo "=== [13/20] DONE ==="
 RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --noconfirm --needed curl wget git sudo nano vim && echo "=== [14/20] DONE ==="
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
