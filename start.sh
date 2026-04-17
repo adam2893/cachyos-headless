@@ -7,40 +7,32 @@ PASSWD=${PASSWD:-cachyos}
 RESOLUTION=${RESOLUTION:-1920x1080}
 DEPTH=${DEPTH:-24}
 
-# ---- Create directories ----
+# ---- Directories ----
 mkdir -p /home/${USER}/.config/tigervnc
 mkdir -p /run/user/${PUID}
 chown -R ${USER}:${USER} /home/${USER}
 chown ${USER}:${USER} /run/user/${PUID}
 
-# ---- VNC password (new path) ----
+# ---- VNC password ----
 echo "${PASSWD}" | vncpasswd -f > /home/${USER}/.config/tigervnc/passwd
 chmod 600 /home/${USER}/.config/tigervnc/passwd
 chown ${USER}:${USER} /home/${USER}/.config/tigervnc/passwd
 
-# ---- VNC config ----
-cat > /home/${USER}/.config/tigervnc/vncserver-config-defaults << CONF
-geometry=${RESOLUTION}
-depth=${DEPTH}
-localhost=no
-CONF
-chown ${USER}:${USER} /home/${USER}/.config/tigervnc/vncserver-config-defaults
+# ---- System D-Bus (PipeWire needs this) ----
+mkdir -p /run/dbus
+dbus-daemon --system --fork
 
-# ---- XFCE startup (new path) ----
-cat > /home/${USER}/.config/tigervnc/Xvnc-session << 'EOF'
-#!/bin/bash
-unset SESSION_MANAGER
-exec startxfce4
-EOF
-chmod +x /home/${USER}/.config/tigervnc/Xvnc-session
-chown ${USER}:${USER} /home/${USER}/.config/tigervnc/Xvnc-session
-
-# ---- Runtime env ----
+# ---- PipeWire ----
+export DISABLE_RTKIT=1
 export XDG_RUNTIME_DIR="/run/user/${PUID}"
-export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+export PIPEWIRE_RUNTIME_DIR="/run/user/${PUID}"
+export PULSE_RUNTIME_DIR="/run/user/${PUID}/pulse"
 
-# ---- D-Bus ----
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}; dbus-daemon --session --fork --address=${DBUS_SESSION_BUS_ADDRESS}"
+su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; pipewire" &
+sleep 1
+su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; wireplumber" &
+sleep 1
+su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; pipewire-pulse" &
 
 # ---- GPU ----
 if [ -d /dev/dri ]; then
@@ -50,25 +42,22 @@ fi
 
 # ---- Clean stale locks ----
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
-rm -f /home/${USER}/.config/tigervnc/*.pid /home/${USER}/.config/tigervnc/*.log
+rm -f /home/${USER}/.config/tigervnc/*.pid /home/${USER}/.config/tigervnc/*.log 2>/dev/null || true
 rm -f /home/${USER}/.vnc/*.pid /home/${USER}/.vnc/*.log 2>/dev/null || true
 
-# ---- PipeWire (background) ----
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; pipewire" &
-sleep 1
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; wireplumber" &
-
-# ---- noVNC (background) ----
+# ---- noVNC ----
 /opt/noVNC-env/bin/websockify --web=/usr/share/novnc 8080 localhost:5901 &
 sleep 1
 
-# ---- Start VNC via script file (avoids su -c quoting issues) ----
-cat > /tmp/start-vnc.sh << 'EOF'
-#!/bin/bash
-cd
-exec vncsession :1
-EOF
-chmod +x /tmp/start-vnc.sh
-chown ${USER}:${USER} /tmp/start-vnc.sh
+# ---- Start Xvnc directly (bypass vncsession/vncserver) ----
+# Xvnc is the actual X server — no systemd needed
+su - ${USER} -c "Xvnc :1 -desktop CachyOS -geometry ${RESOLUTION} -depth ${DEPTH} -rfbauth /home/${USER}/.config/tigervnc/passwd -rfbport 5901 -localhost no -SecurityTypes VncAuth &"
 
-exec su - ${USER} -c /tmp/start-vnc.sh
+# ---- Wait for X server ----
+sleep 3
+
+# ---- Start XFCE ----
+su - ${USER} -c "DISPLAY=:1 startxfce4" &
+
+# ---- Keep container alive ----
+wait -n
