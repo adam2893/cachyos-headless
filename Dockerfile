@@ -59,9 +59,15 @@ RUN echo "=== [16/19] fuse3 + flatpak + ca-certificates-utils + openssl ===" && 
     echo "=== [16/19] DONE ==="
 
 # ---- 17: Steam + gnome-software (bleeding-edge Arc B580) ----
-RUN echo "=== [17/19] Steam + gnome-software (keep bleeding-edge) ===" && \
+RUN echo "=== [17/19] Steam + gnome-software (bleeding edge) ===" && \
+    # Remove stable mesa so git versions win (this is what makes bleeding-edge work)
+    pacman -Rdd --noconfirm mesa lib32-mesa vulkan-mesa-implicit-layers 2>/dev/null || true && \
     pacman -Syu --noconfirm && \
+    # Force bleeding-edge mesa-git + lib32-mesa-git for Arc B580
     pacman -S --noconfirm --needed mesa-git lib32-mesa-git && \
+    # Pre-install providers Steam asks for so no interactive prompts
+    pacman -S --noconfirm --needed libvpl sdl2-compat zimg l-smash && \
+    # Now Steam installs cleanly on top of bleeding-edge
     pacman -S --noconfirm --needed steam gnome-software && \
     echo "=== [17/19] DONE ==="
     
