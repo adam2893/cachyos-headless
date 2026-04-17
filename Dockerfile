@@ -97,9 +97,9 @@ RUN echo "=== [11/18] pipewire + pipewire-pulse + pipewire-alsa + wireplumber + 
     echo "=== [11/18] DONE ==="
 
 # ---- 12: VNC server ----
-RUN echo "=== [12/18] tigervnc ===" && \
-    pacman -S --noconfirm --needed tigervnc && \
-    echo "=== [12/18] DONE ==="
+RUN echo "=== [12/18] tigervnc + supervisor ===" && \
+    pacman -S --noconfirm --needed tigervnc supervisor && \
+    echo "=== [12/18] DONE ==="  
 
 # ---- 13: GPU / Graphics ----
 RUN echo "=== [13/18] mesa + libva-mesa-driver + intel-media-driver + vulkan-intel + vulkan-tools ===" && \
