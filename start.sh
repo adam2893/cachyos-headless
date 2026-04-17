@@ -7,7 +7,7 @@ PASSWD=${PASSWD:-cachyos}
 RESOLUTION=${RESOLUTION:-1920x1080}
 DEPTH=${DEPTH:-24}
 
-# === AGGRESSIVE CLEANUP (fixes restart crashes) ===
+# === AGGRESSIVE CLEANUP ===
 echo "=== Cleaning stale runtime files ==="
 rm -f /run/dbus/pid /run/dbus/system_bus_socket /run/dbus/messagebus.pid
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1 /tmp/.X*-lock
