@@ -1,52 +1,74 @@
 #!/bin/bash
 set -e
 
-# ---- Setup directories ----
-mkdir -p /home/${USER}/.vnc /run/user/${PUID}
-chown -R ${USER}:${USER} /home/${USER} /run/user/${PUID}
+USER=${USER:-cachyos}
+PUID=${PUID:-1000}
+PASSWD=${PASSWD:-cachyos}
+RESOLUTION=${RESOLUTION:-1920x1080}
+DEPTH=${DEPTH:-24}
 
-# ---- VNC password ----
-echo "${PASSWD}" | vncpasswd -f > /home/${USER}/.vnc/passwd
-chmod 600 /home/${USER}/.vnc/passwd
-chown ${USER}:${USER} /home/${USER}/.vnc/passwd
+# ---- Create directories ----
+mkdir -p /home/${USER}/.config/tigervnc
+mkdir -p /run/user/${PUID}
+chown -R ${USER}:${USER} /home/${USER}
+chown ${USER}:${USER} /run/user/${PUID}
 
-# ---- Write xstartup with proper env vars ----
-cat > /home/${USER}/.vnc/xstartup << XSTARTUP_EOF
+# ---- VNC password (new path) ----
+echo "${PASSWD}" | vncpasswd -f > /home/${USER}/.config/tigervnc/passwd
+chmod 600 /home/${USER}/.config/tigervnc/passwd
+chown ${USER}:${USER} /home/${USER}/.config/tigervnc/passwd
+
+# ---- VNC config ----
+cat > /home/${USER}/.config/tigervnc/vncserver-config-defaults << CONF
+geometry=${RESOLUTION}
+depth=${DEPTH}
+localhost=no
+CONF
+chown ${USER}:${USER} /home/${USER}/.config/tigervnc/vncserver-config-defaults
+
+# ---- XFCE startup (new path) ----
+cat > /home/${USER}/.config/tigervnc/Xvnc-session << 'EOF'
 #!/bin/bash
-export XDG_RUNTIME_DIR="/run/user/${PUID}"
-export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${PUID}/bus"
 unset SESSION_MANAGER
 exec startxfce4
-XSTARTUP_EOF
-chmod +x /home/${USER}/.vnc/xstartup
-chown ${USER}:${USER} /home/${USER}/.vnc/xstartup
+EOF
+chmod +x /home/${USER}/.config/tigervnc/Xvnc-session
+chown ${USER}:${USER} /home/${USER}/.config/tigervnc/Xvnc-session
 
-# ---- Runtime environment ----
+# ---- Runtime env ----
 export XDG_RUNTIME_DIR="/run/user/${PUID}"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 
-# ---- Start D-Bus user session ----
+# ---- D-Bus ----
 su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}; dbus-daemon --session --fork --address=${DBUS_SESSION_BUS_ADDRESS}"
 
-# ---- Start PipeWire (background) ----
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}; pipewire -c pipewire-pulse.conf" &
-sleep 1
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}; wireplumber" &
-
-# ---- GPU permissions ----
+# ---- GPU ----
 if [ -d /dev/dri ]; then
     chmod 666 /dev/dri/card* 2>/dev/null || true
     chmod 666 /dev/dri/render* 2>/dev/null || true
 fi
 
-# ---- Clean stale VNC locks ----
+# ---- Clean stale locks ----
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
-rm -f /home/${USER}/.vnc/*.pid /home/${USER}/.vnc/*.log
+rm -f /home/${USER}/.config/tigervnc/*.pid /home/${USER}/.config/tigervnc/*.log
+rm -f /home/${USER}/.vnc/*.pid /home/${USER}/.vnc/*.log 2>/dev/null || true
 
-# ---- Start noVNC (background) ----
+# ---- PipeWire (background) ----
+su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; pipewire" &
+sleep 1
+su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; wireplumber" &
+
+# ---- noVNC (background) ----
 /opt/noVNC-env/bin/websockify --web=/usr/share/novnc 8080 localhost:5901 &
 sleep 1
 
-# ---- Start VNC (foreground, keeps container alive) ----
-# vncserver runs xstartup automatically, which starts XFCE
-exec su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}; vncserver :1 -geometry ${RESOLUTION:-1920x1080} -depth ${DEPTH:-24} -localhost no -rfbauth /home/${USER}/.vnc/passwd -fg"
+# ---- Start VNC via script file (avoids su -c quoting issues) ----
+cat > /tmp/start-vnc.sh << 'EOF'
+#!/bin/bash
+cd
+exec vncsession :1
+EOF
+chmod +x /tmp/start-vnc.sh
+chown ${USER}:${USER} /tmp/start-vnc.sh
+
+exec su - ${USER} -c /tmp/start-vnc.sh
