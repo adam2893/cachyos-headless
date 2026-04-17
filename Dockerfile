@@ -43,6 +43,12 @@ RUN echo "=== [noVNC] Setting up Python venv for websockify ===" && \
     python -m venv /opt/noVNC-env && \
     /opt/noVNC-env/bin/pip install --no-cache-dir websockify && \
     echo "=== [noVNC] DONE ==="
+RUN echo "=== [noVNC web files] Downloading and installing ===" && \
+    pacman -S --noconfirm --needed curl && \
+    mkdir -p /usr/share/novnc && \
+    curl -L https://github.com/novnc/noVNC/archive/refs/tags/v1.5.0.tar.gz | \
+    tar -xz --strip-components=1 -C /usr/share/novnc && \
+    echo "=== [noVNC web files] DONE ==="
 RUN echo "=== [13/20] GPU extras (libva + intel-media + vulkan) ===" && pacman -S --noconfirm --needed libva-mesa-driver intel-media-driver vulkan-icd-loader libva-utils mesa-utils nvtop && echo "=== [13/20] DONE ==="
 RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --noconfirm --needed curl wget git sudo nano vim && echo "=== [14/20] DONE ==="
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
