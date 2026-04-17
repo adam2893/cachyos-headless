@@ -7,57 +7,94 @@ PASSWD=${PASSWD:-cachyos}
 RESOLUTION=${RESOLUTION:-1920x1080}
 DEPTH=${DEPTH:-24}
 
-# ---- Directories ----
-mkdir -p /home/${USER}/.config/tigervnc
-mkdir -p /run/user/${PUID}
+# === CRITICAL FIXES FOR YOUR LOGS ===
+# 1. Generate machine-id (PipeWire + Wireplumber NEED this)
+if [ ! -f /etc/machine-id ]; then
+    dbus-uuidgen --ensure=/etc/machine-id
+fi
+if [ ! -f /var/lib/dbus/machine-id ]; then
+    mkdir -p /var/lib/dbus
+    cp /etc/machine-id /var/lib/dbus/machine-id
+fi
+
+# 2. Fix X11 socket directory (the mkdir error in logs)
+mkdir -p /tmp/.X11-unix
+chmod 1777 /tmp/.X11-unix
+
+# === Directories + VNC password ===
+mkdir -p /home/${USER}/.config/tigervnc /run/user/${PUID}
 chown -R ${USER}:${USER} /home/${USER}
 chown ${USER}:${USER} /run/user/${PUID}
 
-# ---- VNC password ----
 echo "${PASSWD}" | vncpasswd -f > /home/${USER}/.config/tigervnc/passwd
 chmod 600 /home/${USER}/.config/tigervnc/passwd
 chown ${USER}:${USER} /home/${USER}/.config/tigervnc/passwd
 
-# ---- System D-Bus (PipeWire needs this) ----
+# === System D-Bus ===
 mkdir -p /run/dbus
 dbus-daemon --system --fork
 
-# ---- PipeWire ----
-export DISABLE_RTKIT=1
+# === User session D-Bus (this kills all the session bus errors) ===
 export XDG_RUNTIME_DIR="/run/user/${PUID}"
-export PIPEWIRE_RUNTIME_DIR="/run/user/${PUID}"
-export PULSE_RUNTIME_DIR="/run/user/${PUID}/pulse"
+mkdir -p "${XDG_RUNTIME_DIR}"
+chown ${USER}:${USER} "${XDG_RUNTIME_DIR}"
+chmod 700 "${XDG_RUNTIME_DIR}"
 
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; pipewire" &
-sleep 1
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; wireplumber" &
-sleep 1
-su - ${USER} -c "export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}; export PIPEWIRE_RUNTIME_DIR=${PIPEWIRE_RUNTIME_DIR}; export DISABLE_RTKIT=1; pipewire-pulse" &
+# Start user dbus and capture address
+DBUS_SESSION_BUS_ADDRESS=$(su - ${USER} -c "dbus-daemon --session --fork --print-address")
+export DBUS_SESSION_BUS_ADDRESS
+echo "=== User D-Bus started at ${DBUS_SESSION_BUS_ADDRESS} ==="
 
-# ---- GPU ----
+# === GPU / Arc B580 fixes ===
 if [ -d /dev/dri ]; then
     chmod 666 /dev/dri/card* 2>/dev/null || true
     chmod 666 /dev/dri/render* 2>/dev/null || true
+    echo "=== GPU devices permissions fixed ==="
 fi
 
-# ---- Clean stale locks ----
-rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
-rm -f /home/${USER}/.config/tigervnc/*.pid /home/${USER}/.config/tigervnc/*.log 2>/dev/null || true
-rm -f /home/${USER}/.vnc/*.pid /home/${USER}/.vnc/*.log 2>/dev/null || true
+export LIBVA_DRIVER_NAME=iHD
+export MESA_LOADER_DRIVER_OVERRIDE=iris
+export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+echo "=== Arc B580 GPU env set (iHD + iris) ==="
 
-# ---- noVNC ----
+# === PipeWire stack (now with proper user dbus) ===
+su - ${USER} -c "
+    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
+    export DISABLE_RTKIT=1
+    pipewire
+" &
+sleep 1.5
+
+su - ${USER} -c "
+    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
+    export DISABLE_RTKIT=1
+    wireplumber
+" &
+sleep 1
+
+su - ${USER} -c "
+    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
+    export DISABLE_RTKIT=1
+    pipewire-pulse
+" &
+
+# === noVNC ===
 /opt/noVNC-env/bin/websockify --web=/usr/share/novnc 8080 localhost:5901 &
 sleep 1
 
-# ---- Start Xvnc directly (bypass vncsession/vncserver) ----
-# Xvnc is the actual X server — no systemd needed
-su - ${USER} -c "Xvnc :1 -desktop CachyOS -geometry ${RESOLUTION} -depth ${DEPTH} -rfbauth /home/${USER}/.config/tigervnc/passwd -rfbport 5901 -localhost no -SecurityTypes VncAuth &"
+# === Xvnc with GLX (for GPU accel) ===
+su - ${USER} -c "Xvnc :1 -desktop CachyOS -geometry ${RESOLUTION} -depth ${DEPTH} \
+    -rfbauth /home/${USER}/.config/tigervnc/passwd -rfbport 5901 \
+    -localhost no -SecurityTypes VncAuth -extension GLX &"
 
-# ---- Wait for X server ----
-sleep 3
+sleep 4
 
-# ---- Start XFCE ----
-su - ${USER} -c "DISPLAY=:1 startxfce4" &
+# === XFCE desktop (with dbus) ===
+su - ${USER} -c "DISPLAY=:1 DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS} startxfce4" &
 
-# ---- Keep container alive ----
+# Keep container alive
 wait -n
