@@ -22,13 +22,11 @@ RUN echo "=== [1/19] Init pacman & update + multilib ===" && \
 # ---- 2-12: Keep ALL your original XFCE / VNC / audio / utils steps exactly the same ----
 # (copy-paste your original steps 2 through 12 here — I'm not repeating them to save space)
 
-# ---- 13: GPU (keep yours + mesa-utils for future testing) ----
-RUN echo "=== [13/19] mesa + intel stuff + utils ===" && \
+# ---- 13: GPU (keep bleeding-edge mesa-git that CachyOS already has + Arc extras) ----
+RUN echo "=== [13/19] mesa-git + intel stuff + utils ===" && \
     pacman -S --noconfirm --needed \
-        mesa \
         libva-mesa-driver \
         intel-media-driver \
-        vulkan-intel \
         vulkan-icd-loader \
         libva-utils \
         mesa-utils \
