@@ -38,7 +38,7 @@ RUN echo "=== [11/20] pipewire + alsa + pulse + wireplumber ===" && pacman -S --
 RUN echo "=== [12/20] tigervnc ===" && pacman -S --noconfirm --needed tigervnc && echo "=== [12/20] DONE ==="
 # ---- noVNC Python venv (websockify) ----
 RUN echo "=== [noVNC] Setting up Python venv for websockify ===" && \
-    pacman -S --noconfirm --needed python python-pip python-venv && \
+    pacman -S --noconfirm --needed python python-pip && \
     mkdir -p /opt/noVNC-env && \
     python -m venv /opt/noVNC-env && \
     /opt/noVNC-env/bin/pip install --no-cache-dir websockify && \
