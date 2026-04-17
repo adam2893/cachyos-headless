@@ -58,16 +58,18 @@ RUN echo "=== [16/19] fuse3 + flatpak + ca-certificates-utils + openssl ===" && 
     pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && \
     echo "=== [16/19] DONE ==="
 
-# ---- 17: Steam + gnome-software (bleeding-edge Arc B580) ----
+# ---- 17: Steam + gnome-software (bleeding edge Arc B580) ----
 RUN echo "=== [17/19] Steam + gnome-software (bleeding edge) ===" && \
-    # Remove stable mesa so git versions win (this is what makes bleeding-edge work)
-    pacman -Rdd --noconfirm mesa lib32-mesa vulkan-mesa-implicit-layers 2>/dev/null || true && \
-    pacman -Syu --noconfirm && \
-    # Force bleeding-edge mesa-git + lib32-mesa-git for Arc B580
+    # Aggressive removal of EVERY stable mesa package that conflicts
+    pacman -Rdd --noconfirm mesa lib32-mesa mesa-libgl lib32-mesa-libgl \
+        vulkan-mesa-implicit-layers libva-mesa-driver 2>/dev/null || true && \
+    # Full upgrade but BLOCK stable mesa from coming back
+    pacman -Syu --noconfirm --ignore mesa,lib32-mesa && \
+    # Force the bleeding-edge git versions for maximum Arc B580 perf
     pacman -S --noconfirm --needed mesa-git lib32-mesa-git && \
-    # Pre-install providers Steam asks for so no interactive prompts
-    pacman -S --noconfirm --needed libvpl sdl2-compat zimg l-smash && \
-    # Now Steam installs cleanly on top of bleeding-edge
+    # Pre-install the exact providers that were prompting earlier
+    pacman -S --noconfirm --needed libvpl sdl2-compat zimg l-smash libglvnd && \
+    # Now Steam installs cleanly on top of git mesa
     pacman -S --noconfirm --needed steam gnome-software && \
     echo "=== [17/19] DONE ==="
     
