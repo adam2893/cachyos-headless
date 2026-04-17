@@ -58,13 +58,13 @@ RUN echo "=== [16/19] fuse3 + flatpak + ca-certificates-utils + openssl ===" && 
     pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && \
     echo "=== [16/19] DONE ==="
 
-# ---- 17: Steam + gnome-software (force remove mesa-git conflict) ----
-RUN echo "=== [17/19] Steam + gnome-software ===" && \
-    pacman -Rdd --noconfirm mesa-git vulkan-mesa-implicit-layers 2>/dev/null || true && \
+# ---- 17: Steam + gnome-software (bleeding-edge Arc B580) ----
+RUN echo "=== [17/19] Steam + gnome-software (keep bleeding-edge) ===" && \
     pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed mesa-git lib32-mesa-git && \
     pacman -S --noconfirm --needed steam gnome-software && \
     echo "=== [17/19] DONE ==="
-
+    
 # ---- 18: Create user ----
 RUN echo "=== [18/19] Create user ===" && \
     useradd -m -s /bin/bash -u 1000 cachyos && \
