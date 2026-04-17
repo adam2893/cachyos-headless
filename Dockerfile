@@ -56,26 +56,22 @@ RUN echo "=== [18/19] Create user ===" && \
 # ---- 19: Auto-start Steam + Sunshine on XFCE login ----
 RUN echo "=== [19/19] Auto-start Steam + Sunshine ===" && \
     mkdir -p /home/cachyos/.config/autostart && \
-    # Steam autostart
-    cat > /home/cachyos/.config/autostart/steam.desktop <<EOF
-[Desktop Entry]
-Type=Application
-Exec=steam -silent
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=Steam
-EOF && \
-    # Sunshine autostart (runs the host with tray)
-    cat > /home/cachyos/.config/autostart/sunshine.desktop <<EOF
-[Desktop Entry]
-Type=Application
-Exec=sunshine
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=Sunshine
-EOF && \
+    # Steam autostart (silent background)
+    echo '[Desktop Entry]' > /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Type=Application' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Exec=steam -silent' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Hidden=false' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Name=Steam' >> /home/cachyos/.config/autostart/steam.desktop && \
+    # Sunshine autostart
+    echo '[Desktop Entry]' > /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Type=Application' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Exec=sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Hidden=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Name=Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     chown -R cachyos:cachyos /home/cachyos/.config && \
     echo "=== [19/19] DONE ==="
 
