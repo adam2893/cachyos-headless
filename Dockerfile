@@ -10,7 +10,7 @@ ENV USER=cachyos \
     PUID=1000 \
     PGID=1000
 
-# ---- Init pacman & full system update + enable multilib for Steam ----
+# ---- 1: Init pacman & full system update + multilib for Steam ----
 RUN echo "=== [1/19] Init pacman & update + multilib ===" && \
     pacman-key --init && \
     pacman-key --populate archlinux cachyos && \
@@ -19,78 +19,23 @@ RUN echo "=== [1/19] Init pacman & update + multilib ===" && \
     pacman -Syu --noconfirm && \
     echo "=== [1/19] DONE ==="
 
-# ---- 2: XFCE panel ----
-RUN echo "=== [2/18] xfce4-panel ===" && \
-    pacman -S --noconfirm --needed xfce4-panel && \
-    echo "=== [2/18] DONE ==="
+# ---- 2-11: XFCE + audio + fonts + dbus (your original steps) ----
+RUN echo "=== [2/19] xfce4-panel ===" && pacman -S --noconfirm --needed xfce4-panel && echo "=== [2/19] DONE ==="
+RUN echo "=== [3/19] xfce4-session ===" && pacman -S --noconfirm --needed xfce4-session && echo "=== [3/19] DONE ==="
+RUN echo "=== [4/19] xfwm4 + xfdesktop ===" && pacman -S --noconfirm --needed xfwm4 xfdesktop && echo "=== [4/19] DONE ==="
+RUN echo "=== [5/19] xfce4-settings + xfce4-appfinder + xfce4-power-manager ===" && pacman -S --noconfirm --needed xfce4-settings xfce4-appfinder xfce4-power-manager && echo "=== [5/19] DONE ==="
+RUN echo "=== [6/19] xfce4-terminal ===" && pacman -S --noconfirm --needed xfce4-terminal && echo "=== [6/19] DONE ==="
+RUN echo "=== [7/19] thunar + thunar-volman + tumbler + gvfs ===" && pacman -S --noconfirm --needed thunar thunar-volman tumbler gvfs && echo "=== [7/19] DONE ==="
+RUN echo "=== [8/19] xorg-server + tools ===" && pacman -S --noconfirm --needed xorg-server xorg-xinit xorg-xrandr xorg-xauth xorg-fonts-encodings && echo "=== [8/19] DONE ==="
+RUN echo "=== [9/19] dbus ===" && pacman -S --noconfirm --needed dbus && echo "=== [9/19] DONE ==="
+RUN echo "=== [10/19] fonts ===" && pacman -S --noconfirm --needed ttf-dejavu ttf-liberation ttf-freefont noto-fonts noto-fonts-emoji && echo "=== [10/19] DONE ==="
+RUN echo "=== [11/19] pipewire audio ===" && pacman -S --noconfirm --needed pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils && echo "=== [11/19] DONE ==="
 
-# ---- 3: XFCE session ----
-RUN echo "=== [3/18] xfce4-session ===" && \
-    pacman -S --noconfirm --needed xfce4-session && \
-    echo "=== [3/18] DONE ==="
+# ---- 12: VNC server (tigervnc) ----
+RUN echo "=== [12/19] tigervnc ===" && pacman -S --noconfirm --needed tigervnc && echo "=== [12/19] DONE ==="
 
-# ---- 4: XFCE window manager + desktop ----
-RUN echo "=== [4/18] xfwm4 + xfdesktop ===" && \
-    pacman -S --noconfirm --needed xfwm4 xfdesktop && \
-    echo "=== [4/18] DONE ==="
-
-# ---- 5: XFCE settings + appfinder + power manager ----
-RUN echo "=== [5/18] xfce4-settings + xfce4-appfinder + xfce4-power-manager ===" && \
-    pacman -S --noconfirm --needed xfce4-settings xfce4-appfinder xfce4-power-manager && \
-    echo "=== [5/18] DONE ==="
-
-# ---- 6: XFCE terminal ----
-RUN echo "=== [6/18] xfce4-terminal ===" && \
-    pacman -S --noconfirm --needed xfce4-terminal && \
-    echo "=== [6/18] DONE ==="
-
-# ---- 7: Thunar file manager + helpers ----
-RUN echo "=== [7/18] thunar + thunar-volman + tumbler + gvfs ===" && \
-    pacman -S --noconfirm --needed thunar thunar-volman tumbler gvfs && \
-    echo "=== [7/18] DONE ==="
-
-# ---- 8: Xorg server + tools ----
-RUN echo "=== [8/18] xorg-server + xorg-xinit + xorg-xrandr + xorg-xauth + xorg-fonts-encodings ===" && \
-    pacman -S --noconfirm --needed \
-        xorg-server \
-        xorg-xinit \
-        xorg-xrandr \
-        xorg-xauth \
-        xorg-fonts-encodings && \
-    echo "=== [8/18] DONE ==="
-
-# ---- 9: D-Bus ----
-RUN echo "=== [9/18] dbus ===" && \
-    pacman -S --noconfirm --needed dbus && \
-    echo "=== [9/18] DONE ==="
-
-# ---- 10: Fonts ----
-RUN echo "=== [10/18] ttf-dejavu + ttf-liberation + ttf-freefont + noto-fonts + noto-fonts-emoji ===" && \
-    pacman -S --noconfirm --needed \
-        ttf-dejavu \
-        ttf-liberation \
-        ttf-freefont \
-        noto-fonts \
-        noto-fonts-emoji && \
-    echo "=== [10/18] DONE ==="
-
-# ---- 11: Audio (PipeWire) ----
-RUN echo "=== [11/18] pipewire + pipewire-pulse + pipewire-alsa + wireplumber + alsa-utils ===" && \
-    pacman -S --noconfirm --needed \
-        pipewire \
-        pipewire-pulse \
-        pipewire-alsa \
-        wireplumber \
-        alsa-utils && \
-    echo "=== [11/18] DONE ==="
-
-# ---- 12: VNC server ----
-RUN echo "=== [12/18] tigervnc ===" && \
-    pacman -S --noconfirm --needed tigervnc && \
-    echo "=== [12/18] DONE ==="
-
-# ---- 13: GPU (keep bleeding-edge mesa-git that CachyOS already has + Arc extras) ----
-RUN echo "=== [13/19] mesa-git + intel stuff + utils ===" && \
+# ---- 13: GPU (bleeding-edge mesa-git already in base + Arc extras) ----
+RUN echo "=== [13/19] GPU extras for Arc B580 ===" && \
     pacman -S --noconfirm --needed \
         libva-mesa-driver \
         intel-media-driver \
@@ -101,38 +46,24 @@ RUN echo "=== [13/19] mesa-git + intel stuff + utils ===" && \
     echo "=== [13/19] DONE ==="
 
 # ---- 14: System utilities ----
-RUN echo "=== [14/18] curl + wget + git + sudo + nano + vim ===" && \
-    pacman -S --noconfirm --needed \
-        curl \
-        wget \
-        git \
-        sudo \
-        nano \
-        vim && \
-    echo "=== [14/18] DONE ==="
-        vulkan-icd-loader \
-        libva-utils \
-        mesa-utils \
-        nvtop && \
-    echo "=== [13/19] DONE ==="
+RUN echo "=== [14/19] curl + wget + git + sudo + nano + vim ===" && \
+    pacman -S --noconfirm --needed curl wget git sudo nano vim && \
+    echo "=== [14/19] DONE ==="
 
 # ---- 15: Firefox ----
-RUN echo "=== [15/18] firefox ===" && \
-    pacman -S --noconfirm --needed firefox && \
-    echo "=== [15/18] DONE ==="
+RUN echo "=== [15/19] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/19] DONE ==="
 
 # ---- 16: Extras (fuse3, flatpak, certs, openssl) ----
-RUN echo "=== [16/18] fuse3 + flatpak + ca-certificates-utils + openssl ===" && \
+RUN echo "=== [16/19] fuse3 + flatpak + ca-certificates-utils + openssl ===" && \
+    pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && \
+    echo "=== [16/19] DONE ==="
 
-# ---- 17: Gaming packages (Steam + Sunshine) + Flatpak store ----
+# ---- 17: Gaming packages (Steam + Sunshine) + gnome-software ----
 RUN echo "=== [17/19] Steam + Sunshine + gnome-software ===" && \
-    pacman -S --noconfirm --needed \
-        steam \
-        sunshine \
-        gnome-software && \
+    pacman -S --noconfirm --needed steam sunshine gnome-software && \
     echo "=== [17/19] DONE ==="
 
-# ---- 18: Create user (keep yours) ----
+# ---- 18: Create user ----
 RUN echo "=== [18/19] Create user ===" && \
     useradd -m -s /bin/bash -u 1000 cachyos && \
     echo "cachyos:cachyos" | chpasswd && \
@@ -140,10 +71,9 @@ RUN echo "=== [18/19] Create user ===" && \
     usermod -aG audio,video,optical,storage cachyos && \
     echo "=== [18/19] DONE ==="
 
-# ---- 19: Auto-start Steam + Sunshine on XFCE login ----
+# ---- 19: Auto-start Steam + Sunshine ----
 RUN echo "=== [19/19] Auto-start Steam + Sunshine ===" && \
     mkdir -p /home/cachyos/.config/autostart && \
-    # Steam autostart (silent background)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Exec=steam -silent' >> /home/cachyos/.config/autostart/steam.desktop && \
@@ -151,7 +81,6 @@ RUN echo "=== [19/19] Auto-start Steam + Sunshine ===" && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Name=Steam' >> /home/cachyos/.config/autostart/steam.desktop && \
-    # Sunshine autostart
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Exec=sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
@@ -167,7 +96,6 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 VOLUME ["/home/cachyos", "/mnt/games"]
-# Sunshine UDP ports (for Moonlight streaming)
 EXPOSE 5901 8080 47984-48000/udp
 WORKDIR /home/cachyos
 ENTRYPOINT ["/start.sh"]
