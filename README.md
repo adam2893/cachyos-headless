@@ -1,223 +1,299 @@
-<div align="center">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cachyos/cachyos-iso/main/cachyos-logo.png" alt="CachyOS" width="120"/>
+</p>
 
-<img src="https://cachyos.org/_astro/logo.DuMERIP6_qzDwT.svg" alt="CachyOS Logo" width="120" height="120">
+<h1 align="center">CachyOS Headless</h1>
 
-# CachyOS Headless
+<p align="center">
+  <strong>A headless CachyOS desktop in Docker — access via VNC or browser</strong><br/>
+  <sub>Built for Unraid · Intel Arc GPU ready · Inspired by
+    <a href="https://github.com/Steam-Headless/docker-steam-headless">Steam-Headless</a>
+  </sub>
+</p>
 
-### High-Performance Headless Gaming in a Container
-
-**Inspired by [steam-headless](https://github.com/Steam-Headless/docker-steam-headless) by [Josh.5](https://github.com/Josh5)**
-
-[![Docker](https://img.shields.io/badge/Docker-Container-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![CachyOS](https://img.shields.io/badge/CachyOS-Performance_Optimized-1793D1)](https://cachyos.org/)
-[![Steam](https://img.shields.io/badge/Steam-Enabled-1B2838?logo=steam&logoColor=white)](https://store.steampowered.com/)
-[![Sunshine](https://img.shields.io/badge/Sunshine-Streaming-FFB800?logo=sun&logoColor=black)](https://github.com/LizardByte/Sunshine)
-
-</div>
-
----
-
-## Overview
-
-**CachyOS Headless** is a Dockerised headless gaming environment that runs the Steam Client (with Proton) inside a virtual X11 desktop, enabling high-performance remote game streaming from any server or NAS. It takes the proven foundation of the steam-headless project and rebuilds it on top of **CachyOS** - a high-performance Arch Linux distribution renowned for its aggressive compiler optimisations, custom gaming-tuned kernels, and bleeding-edge Mesa drivers.
-
-Run your entire Steam library on a headless Linux box and stream it to any device in your home, all without ever attaching a monitor. Whether you are running on bare metal, a home server, Unraid, TrueNAS, or a cloud VM with a GPU, CachyOS Headless delivers lower latency, better frame pacing, and higher throughput compared to generic Debian-based containers thanks to its performance-optimised foundation.
-
----
-
-## Why CachyOS?
-
-Traditional headless Steam containers are built on Debian or Ubuntu, which use generic `x86-64` baseline package compilations and stock Linux kernels. **CachyOS Headless** swaps that foundation for something fundamentally faster:
-
-| Feature | Debian-based Containers | CachyOS Headless |
-|---|---|---|
-| **CPU Optimisation** | Generic x86-64 baseline | x86-64-v3 / v4 with LTO, PGO, BOLT |
-| **Kernel Scheduler** | Standard Linux scheduler | BORE scheduler (gaming-optimised) |
-| **Mesa / GPU Drivers** | May lag behind releases | Bleeding-edge from Arch rolling repos |
-| **Gaming Responsiveness** | Standard scheduling | Burst-oriented frame pacing |
-| **Package Freshness** | Fixed release cadence | Rolling release - always latest |
-| **AUR Access** | Not available | Full AUR access for bleeding-edge tools |
-
-### The BORE Scheduler Advantage
-
-The **BORE (Burst-Oriented Response Enhancer)** scheduler is a custom patch set built on top of EEVDF that is specifically tuned for interactive and bursty workloads like gaming. It delivers smoother frame times, reduced input latency, and improved responsiveness under load compared to the default Linux scheduler, making it the ideal choice for a headless gaming container.
+<p align="center">
+  <a href="https://ghcr.io"><img src="https://img.shields.io/badge/registry-ghcr.io-blue?logo=github" alt="GHCR"/></a>
+  <a href="https://hub.docker.com/r/cachyos/cachyos-v3"><img src="https://img.shields.io/badge/base-cachyos%2Fcachyos--v3-orange?logo=linux" alt="Base Image"/></a>
+  <a href="https://cachyos.org"><img src="https://img.shields.io/badge/distro-CachyOS-blue?logo=arch-linux" alt="CachyOS"/></a>
+  <a href="https://xfce.org"><img src="https://img.shields.io/badge/desktop-XFCE4-blue?logo=xfce" alt="XFCE4"/></a>
+  <a href="https://tigervnc.org"><img src="https://img.shields.io/badge/VNC-TigerVNC-green?logo=vnc" alt="TigerVNC"/></a>
+  <a href="https://github.com/novnc/noVNC"><img src="https://img.shields.io/badge/web%20client-noVNC-9cf?logo=firefox-browser" alt="noVNC"/></a>
+  <a href="https://pipewire.org"><img src="https://img.shields.io/badge/audio-PipeWire-purple?logo=linux" alt="PipeWire"/></a>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/arch-linux%2Famd64-x86__64__v3-informational" alt="x86-64-v3"/>
+  <img src="https://img.shields.io/badge/gpu-intel%20arc-green?logo=intel" alt="Intel Arc"/>
+</p>
 
 ---
 
-## Features
+## ✨ Features
 
-- **Steam Client with Proton** - Full Steam Linux client pre-configured with Proton for Windows game compatibility
-- **Sunshine / Moonlight Streaming** - Built-in Sunshine server for ultra-low-latency game streaming via Moonlight clients (NVIDIA GameStream compatible)
-- **noVNC Web UI** - Browser-based access to the Xfce4 desktop environment for management and configuration
-- **Multi-GPU Support** - NVIDIA, AMD, and Intel GPU passthrough with per-GPU PCI device isolation
-- **Controller Support** - Full gamepad / controller passthrough for wired and wireless devices
-- **Steam Remote Play** - Can act as a Steam Remote Play host for streaming to other Steam clients
-- **Flatpak & AppImage** - Install additional game launchers (Heroic, Lutris, EmuDeck) via Flatpak
-- **SSH Access** - Built-in SSH server on port `2222` for remote administration
-- **Auto-start Scripts** - Drop `.sh` scripts into `~/init.d` to execute on container startup
-- **Root Access** - Full `sudo` access inside the container for advanced configuration
-- **GameMode & MangoHud** - Pre-installed Feral GameMode and MangoHud for performance monitoring and optimisation
+| Feature | Details |
+|---------|---------|
+| 🐧 **CachyOS Base** | Built on `cachyos/cachyos-v3` — Arch-based with BORE scheduler & x86-64-v3 optimisations |
+| 🖥️ **XFCE4 Desktop** | Full lightweight desktop with Thunar file manager and system utilities |
+| 🔗 **Dual Access** | Native VNC (port `5901`) **and** browser-based noVNC (port `8080`) |
+| 🎮 **Intel GPU Support** | Mesa, VA-API (`iHD`), Vulkan — optimised for Intel Arc B580 |
+| 🔊 **PipeWire Audio** | Modern audio stack with PulseAudio compatibility (`pipewire-pulse`) |
+| 🔄 **Auto-Restart** | All services managed via `supervisord` with automatic recovery |
+| 📦 **Flatpak Ready** | Install additional apps (Spotify, Discord, etc.) at runtime |
+| 💾 **Persistent Storage** | Home directory and game storage survive container restarts |
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
-### Prerequisites
-
-- Docker Engine 20.10+ with [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) (for NVIDIA GPUs)
-- A GPU (NVIDIA, AMD, or Intel) with working drivers on the host
-- [Moonlight](https://moonlight-stream.org/) client on your streaming device
-
-### Pull & Run (NVIDIA)
+### Pull
 
 ```bash
-docker run -d \
-  --name=cachyos-headless \
-  --gpus all \
-  -e NVIDIA_DRIVER_CAPABILITIES=all \
-  -e MODE=primary \
-  -e TZ=Australia/Sydney \
-  -e USER_PASSWORD=yourpassword \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -p 47984-47990:47984-47990/tcp \
-  -p 48010:48010/tcp \
-  -p 47989:47989/udp \
-  -p 47998-48000:47998-48000/udp \
-  -p 8083:8083/tcp \
-  -p 2222:2222/tcp \
-  -v /path/to/steam:/home/user/Steam \
-  -v /path/to/config:/home/user/.config \
-  adam2893/cachyos-headless:latest
+docker pull ghcr.io/<your-username>/cachyos-headless:latest
 ```
 
-### Docker Compose (NVIDIA)
+### Docker Compose
 
 ```yaml
 services:
   cachyos-headless:
-    image: adam2893/cachyos-headless:latest
-    container_name: cachyos-headless
-    restart: unless-stopped
-    environment:
-      - MODE=primary
-      - TZ=Australia/Sydney
-      - USER_PASSWORD=yourpassword
-      - PUID=1000
-      - PGID=1000
-    volumes:
-      - ./steam:/home/user/Steam
-      - ./config:/home/user/.config
+    image: ghcr.io/<your-username>/cachyos-headless:latest
+    container_name: CachyOS-Headless
+    privileged: true
+    shm_size: '2gb'
     ports:
-      # Sunshine streaming ports
-      - 47984-47990:47984-47990/tcp
-      - 48010:48010/tcp
-      - 47989:47989/udp
-      - 47998-48000:47998-48000/udp
-      # noVNC web UI
-      - 8083:8083/tcp
-      # SSH
-      - 2222:2222/tcp
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-```
-
-### AMD / Intel GPU
-
-Replace the GPU deployment section with device mounts:
-
-```yaml
+      - "5901:5901"   # VNC
+      - "8080:8080"   # noVNC (browser)
+    volumes:
+      - /mnt/user/appdata/cachyos:/home/cachyos   # persistent home
+      - /mnt/user/games:/mnt/games                 # game storage
     devices:
-      - /dev/dri:/dev/dri
+      - /dev/dri:/dev/dri                          # Intel GPU passthrough
+    environment:
+      - USER=cachyos
+      - PASSWD=cachyos
+      - LIBVA_DRIVER_NAME=iHD
+    restart: unless-stopped
 ```
+
+### Docker CLI
+
+```bash
+docker run -d \
+  --name CachyOS-Headless \
+  --privileged \
+  --shm-size=2gb \
+  -p 5901:5901 -p 8080:8080 \
+  -v /mnt/user/appdata/cachyos:/home/cachyos \
+  -v /mnt/user/games:/mnt/games \
+  -e USER=cachyos -e PASSWD=cachyos \
+  -e LIBVA_DRIVER_NAME=iHD \
+  ghcr.io/<your-username>/cachyos-headless:latest
+```
+
+### Connect
+
+| Method | Address | Default Password |
+|--------|---------|:----------------:|
+| 🖥️ **VNC Client** (TigerVNC, RealVNC, Remmina) | `<your-ip>:5901` | `cachyos` |
+| 🌐 **Browser** (noVNC) | `http://<your-ip>:8080/vnc.html` | `cachyos` |
 
 ---
 
-## Environment Variables
+## ⚙️ Configuration
+
+### Environment Variables
 
 | Variable | Default | Description |
-|---|---|---|
-| `MODE` | `primary` | GPU mode: `primary` or `secondary` |
-| `TZ` | `UTC` | Timezone (e.g. `Australia/Sydney`) |
-| `USER_PASSWORD` | `password` | Password for the container user |
-| `PUID` | `1000` | User ID for file permissions |
-| `PGID` | `1000` | Group ID for file permissions |
-| `DISPLAY` | `:0` | Virtual display number |
-| `WEBUI_PORT` | `8083` | Port for the noVNC web interface |
-| `SSH_PORT` | `2222` | Port for the SSH server |
+|----------|:-------:|-------------|
+| `USER` | `cachyos` | Desktop username |
+| `PASSWD` | `cachyos` | VNC & user password (set at runtime) |
+| `DISPLAY` | `:1` | X11 display number |
+| `RESOLUTION` | `1920x1080` | Desktop resolution |
+| `DEPTH` | `24` | Colour depth |
+| `PUID` | `1000` | User UID |
+| `PGID` | `1000` | User GID |
+| `LIBVA_DRIVER_NAME` | `iHD` | VA-API driver for Intel GPU |
+| `TERM` | `xterm` | Terminal type |
+
+### Volumes
+
+| Host Path | Container Path | Purpose |
+|-----------|:--------------:|---------|
+| `/mnt/user/appdata/cachyos` | `/home/cachyos` | Persistent user home |
+| `/mnt/user/games` | `/mnt/games` | Game storage |
+
+### Devices
+
+| Device | Purpose |
+|--------|---------|
+| `/dev/dri` | Intel GPU passthrough (DRI + render nodes) |
+
+### Recommended Docker Flags
+
+| Flag | Why |
+|------|-----|
+| `--privileged` | GPU device access & DRI permissions |
+| `--shm-size=2gb` | Prevents rendering glitches & tab crashes in Chromium/Electron |
 
 ---
 
-## Ports
+## 📁 File Structure
 
-| Port | Protocol | Service |
-|---|---|---|
-| `47984-47990` | TCP | Sunshine streaming |
-| `48010` | TCP | Sunshine control |
-| `47989` | UDP | Sunshine streaming |
-| `47998-48000` | UDP | Sunshine streaming |
-| `8083` | TCP | noVNC web UI |
-| `2222` | TCP | SSH server |
-| `32123` | TCP | Web audio stream |
-
----
-
-## Connecting
-
-### Game Streaming (Recommended)
-
-1. Open the [noVNC Web UI](http://localhost:8083) in your browser to set up Sunshine
-2. Pair your Moonlight client with the container's IP address
-3. Launch games through Moonlight for ultra-low-latency streaming
-
-### noVNC Web Access
-
-Open `http://<your-server-ip>:8083` in any modern browser for a full remote desktop experience with audio support.
-
-### SSH Access
-
-```bash
-ssh user@<your-server-ip> -p 2222
+```
+cachyos-headless/
+├── .github/
+│   └── workflows/
+│       └── docker-build.yml       # CI/CD pipeline
+├── Dockerfile                     # Main image
+├── Dockerfile.diagnostic          # Step-by-step build (debugging)
+├── supervisord.conf               # Service orchestration
+├── start.sh                       # Container entrypoint
+└── README.md                      ← you are here
 ```
 
 ---
 
-## Volumes
+## 🏗️ Service Architecture
 
-| Host Path | Container Path | Description |
-|---|---|---|
-| `./steam` | `/home/user/Steam` | Steam library and game data |
-| `./config` | `/home/user/.config` | Application configuration files |
+All services are managed by `supervisord` with automatic restart on failure:
 
-You can add additional volume mounts for game storage, ROMs, or other media as needed.
+```
+ ┌─────────────────────────────────────────────────┐
+ │                  supervisord                     │
+ │                                                  │
+ │  Priority 10   PipeWire (audio server)          │
+ │  Priority 11   PipeWire-Pulse (PA compat)        │
+ │  Priority 12   WirePlumber (session manager)     │
+ │  Priority 20   TigerVNC (X server + VNC :1)      │
+ │  Priority 30   XFCE4 (desktop environment)       │
+ │  Priority 40   noVNC / websockify (port 8080)    │
+ └─────────────────────────────────────────────────┘
+```
+
+> **Design note:** TigerVNC is both the X server and VNC server — no separate Xvfb or x11vnc needed, eliminating the port conflicts common in other setups.
 
 ---
 
-## Building from Source
+## 🎮 Intel Arc GPU Support
+
+Out-of-the-box support for Intel Arc B580 and compatible hardware:
+
+| Component | Driver |
+|-----------|--------|
+| OpenGL | **Mesa** |
+| Vulkan | **vulkan-intel** |
+| VA-API (encode/decode) | **intel-media-driver** (`iHD`) |
+| VA-API (fallback) | **libva-mesa-driver** |
+
+### Verify GPU Access
 
 ```bash
-git clone https://github.com/adam2893/cachyos-headless.git
+docker exec -it CachyOS-Headless bash
+
+# VA-API
+vainfo
+
+# Vulkan
+vulkaninfo | grep deviceName
+```
+
+### Change Resolution
+
+```bash
+docker exec CachyOS-Headless xrandr --output VNC-0 --mode 2560x1440
+```
+
+---
+
+## 📦 Post-Install
+
+Install additional software from inside the desktop:
+
+```bash
+# Update system
+sudo pacman -Syu
+
+# Steam with CachyOS gaming optimisations
+sudo pacman -S steam cachyos-gaming-meta
+
+# Flatpak apps
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install spotify discord
+```
+
+---
+
+## 🔨 Building
+
+### Standard Build
+
+```bash
+git clone https://github.com/<your-username>/cachyos-headless.git
 cd cachyos-headless
-docker build -t adam2893/cachyos-headless:latest .
+docker build -t cachyos-headless:latest .
 ```
 
+### Debug Build Failure
+
+If a package fails during `docker build`, use the diagnostic Dockerfile to find exactly which one:
+
+```bash
+docker build --progress=plain -f Dockerfile.diagnostic -t cachyos-test . 2>&1 | tee build.log
+```
+
+Search `build.log` for the last `=== [N/18] DONE ===` — the next step is the one that broke.
+
 ---
 
-## Acknowledgements
+## 🔄 CI/CD
 
-- [**Josh.5 / steam-headless**](https://github.com/Steam-Headless/docker-steam-headless) - The original project that inspired this container
-- [**CachyOS**](https://cachyos.org/) - The high-performance Arch Linux distribution that forms the foundation
-- [**Sunshine**](https://github.com/LizardByte/Sunshine) - Game streaming server (NVIDIA GameStream compatible)
-- [**Moonlight**](https://moonlight-stream.org/) - Game streaming client
-- [**Valve / Steam**](https://store.steampowered.com/) - Steam Client and Proton compatibility layer
+The GitHub Actions workflow (`docker-build.yml`) handles everything:
+
+- ✅ **Automatic builds** on push to `main` and tagged releases (`v*`)
+- 📅 **Weekly rebuilds** (Sunday midnight UTC) for latest CachyOS packages
+- 🏷️ **Smart tags** — `latest`, branch name, semver (`v1.0.0`, `v1.0`, `v1`)
+- ⚡ **Layer caching** via GitHub Actions cache for faster builds
+- 📤 **GHCR publishing** to `ghcr.io/<your-username>/cachyos-headless`
+
+| Repo Visibility | Pull Auth |
+|:---------------:|-----------|
+| **Public** | None required (100 pulls/hr/IP) |
+| **Private** | GitHub PAT with `read:packages` |
 
 ---
 
-## License
+## ❓ Troubleshooting
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+| Problem | Fix |
+|---------|-----|
+| ⬛ **Black screen** | `docker logs CachyOS-Headless` — check XFCE started |
+| 🎨 **No GPU** | Verify `--privileged` and `/dev/dri` mapping |
+| 🔇 **No audio** | `docker exec CachyOS-Headless pactl info` |
+| 🚫 **Permission denied** | `chown -R 1000:1000 /mnt/user/appdata/cachyos` on host |
+| 🌐 **noVNC won't load** | `docker exec CachyOS-Headless supervisorctl status novnc` |
+| 💥 **Won't start** | `rm -rf /mnt/user/appdata/cachyos/.vnc/*.pid` (stale locks) |
+
+---
+
+## ⚠️ Known Limitations
+
+- 🚫 **No systemd** — services managed via `supervisord` instead
+- 👤 **Single-user** — not designed for multi-user setups
+- 🦾 **x86-64-v3 only** — no ARM support (no Raspberry Pi / Apple Silicon)
+- 📦 **~3–4 GB image** — XFCE + Mesa + Vulkan + Firefox
+- 🖥️ **X11 only** — no Wayland support
+
+---
+
+## 🙏 Acknowledgements
+
+| Project | Role |
+|---------|------|
+| [CachyOS](https://cachyos.org/) | High-performance Arch-based distro |
+| [Steam-Headless](https://github.com/Steam-Headless/docker-steam-headless) | Headless desktop container pattern |
+| [noVNC](https://github.com/novnc/noVNC) | Browser-based VNC client |
+| [TigerVNC](https://tigervnc.org/) | High-performance VNC server |
+
+---
+
+## 📄 License
+
+MIT
