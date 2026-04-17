@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-export ENV_VNC_GEOMETRY="${RESOLUTION:-1920x1080}"
-export ENV_VNC_DEPTH="${DEPTH:-24}"
+export VNC_GEOMETRY="${RESOLUTION:-1920x1080}"
+export VNC_DEPTH="${DEPTH:-24}"
 
 # Create .vnc directory if it doesn't exist (volume mount may hide build-time dirs)
 mkdir -p "/home/${USER}/.vnc"
