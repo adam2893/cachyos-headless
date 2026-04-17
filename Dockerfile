@@ -165,7 +165,11 @@ RUN echo "=== [18/18] Create user, copy configs ===" && \
 # Copy runtime configs
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+COPY vnc-start.sh /home/cachyos/vnc-start.sh
+COPY xfce-start.sh /home/cachyos/xfce-start.sh
+COPY pipewire-start.sh /home/cachyos/pipewire-start.sh
+RUN chmod +x /start.sh /home/cachyos/vnc-start.sh /home/cachyos/xfce-start.sh /home/cachyos/pipewire-start.sh && \
+    chown cachyos:cachyos /home/cachyos/vnc-start.sh /home/cachyos/xfce-start.sh /home/cachyos/pipewire-start.sh
 
 VOLUME ["/home/cachyos", "/mnt/games"]
 EXPOSE 5901 8080
