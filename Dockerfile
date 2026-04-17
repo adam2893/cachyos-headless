@@ -49,9 +49,9 @@ RUN echo "=== [17/20] Steam + gnome-software ===" && \
 
 # ---- 18: Create user + sudo + groups + autostart Steam + Sunshine ----
 RUN echo "=== [18/20] User setup + autostart ===" && \
-    useradd -m -u 1000 -g users -s /bin/bash cachyos && \
+    groupadd -g 1000 cachyos && \
+    useradd -m -u 1000 -g cachyos -G audio,video,wheel -s /bin/bash cachyos && \
     echo "cachyos:${PASSWD}" | chpasswd && \
-    usermod -aG audio,video,wheel cachyos && \
     echo "cachyos ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/cachyos && \
     mkdir -p /home/cachyos/.config/autostart && \
     # Steam autostart (silent)
@@ -62,7 +62,7 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Name=Steam' >> /home/cachyos/.config/autostart/steam.desktop && \
-    # Sunshine autostart (you install via yay later)
+    # Sunshine autostart (install via yay after first run)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Exec=sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
