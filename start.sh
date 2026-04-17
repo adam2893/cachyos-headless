@@ -22,9 +22,8 @@ fi
 export XDG_RUNTIME_DIR="/run/user/${PUID}"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 
-# --- Start D-Bus user session ---
-dbus-daemon --session --fork --address="${DBUS_SESSION_BUS_ADDRESS}"
-chown "${USER}:${USER}" "${XDG_RUNTIME_DIR}/bus"
+# --- Start D-Bus user session (as the user, not root) ---
+su - "${USER}" -c "dbus-daemon --session --fork --address=${DBUS_SESSION_BUS_ADDRESS}"
 
 # --- GPU permissions ---
 if [ -d /dev/dri ]; then
