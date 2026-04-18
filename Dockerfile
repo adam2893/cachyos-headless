@@ -53,6 +53,11 @@ RUN echo "=== [13/20] GPU extras (libva + intel-media + vulkan) ===" && pacman -
 RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --noconfirm --needed curl wget git sudo nano vim && echo "=== [14/20] DONE ==="
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
 RUN echo "=== [16/20] fuse3 + flatpak + ca-certificates + openssl ===" && pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && echo "=== [16/20] DONE ==="
+# ---- 16b: Flatpak + Flathub + pre-populate appstore metadata (so it never goes empty again) ----
+RUN echo "=== [16b/20] Flatpak + Flathub + appstream ===" && \
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && \
+    flatpak update --appstream && \
+    echo "=== [16b/20] DONE ==="
 
 # ---- 17: Steam + gnome-software (now safe because mesa-git is already installed) ----
 RUN echo "=== [17/20] Steam + gnome-software ===" && \
