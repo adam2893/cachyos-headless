@@ -93,11 +93,11 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     chown -R cachyos:cachyos /home/cachyos && \
     echo "=== [18/20] DONE ==="
     
-# ---- Flatpak user-level setup (must run AFTER user is created) ----
-RUN echo "=== 18b [Flatpak user-level setup] ===" && \
+RUN echo "=== [Flatpak user-level setup] ===" && \
+    rm -rf /home/cachyos/.local/share/flatpak/* /home/cachyos/.cache/flatpak/* 2>/dev/null || true && \
     su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
     su - cachyos -c "flatpak --user update --appstream" && \
-    echo "=== 18b [Flatpak user-level setup] DONE ==="
+    echo "=== [Flatpak user-level setup] DONE ==="
 
 # ---- 19: Final cleanup + start script ----
 RUN echo "=== [19/20] Cleanup ===" && \
