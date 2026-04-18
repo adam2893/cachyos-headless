@@ -45,8 +45,7 @@ RUN echo "=== [2/20] Xorg + x11vnc + xorg apps ===" && \
         xorg-xauth xorg-apps xorg-fonts-misc \
         xf86-input-evdev xterm \
         x11vnc \
-        xf86-video-dummy \
-        cvt && \
+        xf86-video-dummy && \
     echo "=== [2/20] DONE ==="
 
 # ---- 3: Supervisor ----
