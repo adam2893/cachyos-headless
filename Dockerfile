@@ -123,21 +123,28 @@ RUN echo "=== [15b/20] 32-bit + Gamemode ===" && \
         gamemode && \
     echo "=== [15b/20] DONE ==="
 
-# ---- 16: Sunshine (native package, not flatpak) ----
-RUN echo "=== [16/20] Sunshine ===" && \
-    pacman -S --noconfirm --needed sunshine miniupnpc && \
-    setcap cap_sys_admin+p "$(readlink -f $(which sunshine))" && \
-    echo "=== [16/20] DONE ==="
-
-# ---- 17: Create user + sudo ----
-RUN echo "=== [17/20] User setup ===" && \
+# ---- 16: Create user + sudo (moved up — needed for yay) ----
+RUN echo "=== [16/20] User setup ===" && \
     groupadd -g 1000 cachyos && \
     useradd -m -u 1000 -g cachyos -G audio,video,wheel -s /bin/bash cachyos && \
     echo "cachyos:${PASSWD}" | chpasswd && \
     echo "cachyos ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/cachyos && \
     mkdir -p /home/cachyos/.config/autostart /home/cachyos/.config/sunshine /home/cachyos/.cache/log && \
     chown -R cachyos:cachyos /home/cachyos && \
-    echo "=== [17/20] DONE ==="
+    echo "=== [16/20] DONE ==="
+
+# ---- 16b: Install yay (AUR helper, needs user) ----
+RUN echo "=== [16b/20] Install yay ===" && \
+    pacman -S --noconfirm --needed base-devel git && \
+    su - cachyos -c "git clone https://aur.archlinux.org/yay.git /tmp/yay && cd /tmp/yay && makepkg --noconfirm --syncdeps --install" && \
+    rm -rf /tmp/yay /home/cachyos/.cache/yay && \
+    echo "=== [16b/20] DONE ==="
+
+# ---- 16c: Sunshine (from AUR via yay, like Josh5) ----
+RUN echo "=== [16c/20] Sunshine ===" && \
+    su - cachyos -c "yay -Syu --noconfirm --needed miniupnpc sunshine-bin" && \
+    setcap cap_sys_admin+p "$(readlink -f $(which sunshine))" && \
+    echo "=== [16c/20] DONE ==="
 
 # ---- 18: Flatpak system-level setup ----
 RUN echo "=== [18/20] Flatpak system-level setup ===" && \
@@ -149,7 +156,7 @@ RUN echo "=== [18/20] Flatpak system-level setup ===" && \
 # ---- 19: Final cleanup ----
 RUN echo "=== [19/20] Cleanup ===" && \
     pacman -Sc --noconfirm && \
-    rm -rf /var/cache/pacman/pkg/* /tmp/* && \
+    rm -rf /var/cache/pacman/pkg/* /var/lib/pacman/sync/* /home/cachyos/.cache/yay /tmp/* && \
     echo "=== [19/20] DONE ==="
 
 # ---- 20: Add overlay files ----
