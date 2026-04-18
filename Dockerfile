@@ -91,13 +91,13 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Name=Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     chown -R cachyos:cachyos /home/cachyos && \
+    echo "=== [18/20] DONE ==="
     
 # ---- Flatpak user-level setup (must run AFTER user is created) ----
-RUN echo "=== [Flatpak user-level setup] ===" && \
+RUN echo "=== 18b [Flatpak user-level setup] ===" && \
     su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
     su - cachyos -c "flatpak --user update --appstream" && \
-    echo "=== [Flatpak user-level setup] DONE ==="
-    echo "=== [18/20] DONE ==="
+    echo "=== 18b [Flatpak user-level setup] DONE ==="
 
 # ---- 19: Final cleanup + start script ----
 RUN echo "=== [19/20] Cleanup ===" && \
