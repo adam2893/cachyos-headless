@@ -96,8 +96,6 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
 RUN echo "=== [Flatpak user-level setup] ===" && \
     rm -rf /home/cachyos/.local/share/flatpak/* /home/cachyos/.cache/flatpak/* 2>/dev/null || true && \
     su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
-    su - cachyos -c "flatpak --user install -y flathub dev.lizardbyte.app.Sunshine" && \
-    su - cachyos -c "flatpak --user update --appstream" && \
     echo "=== [Flatpak user-level setup] DONE ==="
 
 # ---- 19: Final cleanup + start script ----

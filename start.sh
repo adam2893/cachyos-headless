@@ -54,6 +54,16 @@ if [ -d /dev/dri ]; then
     echo "=== GPU devices permissions fixed ==="
 fi
 
+# === Install Sunshine flatpak at runtime (requires D-Bus) ===
+if ! su - ${USER} -c "flatpak --user list 2>/dev/null | grep -q sunshine" 2>/dev/null; then
+    echo "=== Installing Sunshine flatpak (first boot) ==="
+    su - ${USER} -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" 2>/dev/null || true
+    su - ${USER} -c "flatpak --user install -y flathub dev.lizardbyte.app.Sunshine" 2>/dev/null || echo "=== WARNING: Sunshine flatpak install failed, will retry next boot ==="
+    echo "=== Sunshine flatpak install done ==="
+else
+    echo "=== Sunshine flatpak already installed ==="
+fi
+
 # === Export env vars for supervisord child processes ===
 export RESOLUTION
 export DEPTH
