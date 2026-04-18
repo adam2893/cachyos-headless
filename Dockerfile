@@ -82,10 +82,10 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Name=Steam' >> /home/cachyos/.config/autostart/steam.desktop && \
-    # Sunshine autostart (flatpak user install)
+    # Sunshine autostart (user-level flatpak, correct command + additional-install)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/sunshine.desktop && \
-    echo 'Exec=flatpak run --branch=stable --arch=x86_64 --command=sunshine.sh dev.lizardbyte.app.Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Exec=flatpak run --user dev.lizardbyte.app.Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Hidden=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/sunshine.desktop && \
