@@ -53,11 +53,12 @@ RUN echo "=== [13/20] GPU extras (libva + intel-media + vulkan) ===" && pacman -
 RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --noconfirm --needed curl wget git sudo nano vim && echo "=== [14/20] DONE ==="
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
 RUN echo "=== [16/20] fuse3 + flatpak + ca-certificates + openssl ===" && pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && echo "=== [16/20] DONE ==="
-# ---- 16b: Flatpak + Flathub + pre-populate appstore metadata (so it never goes empty again) ----
-RUN echo "=== [16b/20] Flatpak + Flathub + appstream ===" && \
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && \
-    flatpak update --appstream && \
-    echo "=== [16b/20] DONE ==="
+# ---- Flatpak + Flathub (user-level + pre-populate) ----
+RUN echo "=== [Flatpak user-level setup] ===" && \
+    pacman -S --noconfirm --needed flatpak && \
+    su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
+    su - cachyos -c "flatpak --user update --appstream" && \
+    echo "=== [Flatpak user-level setup] DONE ==="
 
 # ---- 17: Steam + gnome-software (now safe because mesa-git is already installed) ----
 RUN echo "=== [17/20] Steam + gnome-software ===" && \
@@ -82,15 +83,15 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     # Steam autostart (silent)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/steam.desktop && \
-    echo 'Exec=steam -silent' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Exec=env MESA_LOADER_DRIVER_OVERRIDE=iris __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 gamemoderun steam -bigpicture -silent -no-cef-sandbox' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Hidden=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Name=Steam' >> /home/cachyos/.config/autostart/steam.desktop && \
-    # Sunshine autostart (install via yay after first run)
+    # Sunshine autostart (flatpak user install)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/sunshine.desktop && \
-    echo 'Exec=sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
+    echo 'Exec=flatpak run --branch=stable --arch=x86_64 --command=sunshine.sh dev.lizardbyte.app.Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Hidden=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/sunshine.desktop && \
