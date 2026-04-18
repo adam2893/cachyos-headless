@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+###
+# File: xfce4-minimise-all-windows
+# Description: Minimize all windows (used by Sunshine prep-cmd)
+###
+if [ -n "${DISPLAY}" ]; then
+    wmctrl -l | awk '{print $1}' | while read -r wid; do
+        xdotool windowminimize "$wid" 2>/dev/null || true
+    done
+fi
