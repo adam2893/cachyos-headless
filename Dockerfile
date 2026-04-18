@@ -60,6 +60,13 @@ RUN echo "=== [17/20] Steam + gnome-software ===" && \
     pacman -S --noconfirm --needed steam gnome-software && \
     echo "=== [17/20] DONE ==="
 
+# ---- 17b: 32-bit + Gamemode for optimal Steam + Arc B580 performance ----
+RUN echo "=== [17b/20] 32-bit + Gamemode ===" && \
+    pacman -S --noconfirm --needed \
+        lib32-mesa-git lib32-vulkan-icd-loader lib32-libva lib32-gamemode \
+        gamemode && \
+    echo "=== [17b/20] DONE ==="
+
 # ---- 18: Create user + sudo + groups + autostart Steam + Sunshine ----
 RUN echo "=== [18/20] User setup + autostart ===" && \
     groupadd -g 1000 cachyos && \
