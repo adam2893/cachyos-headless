@@ -35,7 +35,7 @@ RUN echo "=== [8/20] xorg-server + xorg-xinit + xorg-xrandr + xorg-xset + xorg-x
 RUN echo "=== [9/20] dbus + dbus-glib ===" && pacman -S --noconfirm --needed dbus dbus-glib && echo "=== [9/20] DONE ==="
 RUN echo "=== [10/20] fonts + noto + ttf-dejavu + ttf-liberation ===" && pacman -S --noconfirm --needed noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-liberation && echo "=== [10/20] DONE ==="
 RUN echo "=== [11/20] pipewire + alsa + pulse + wireplumber ===" && pacman -S --noconfirm --needed pipewire pipewire-alsa pipewire-pulse wireplumber alsa-utils && echo "=== [11/20] DONE ==="
-RUN echo "=== [12/20] tigervnc ===" && pacman -S --noconfirm --needed tigervnc && echo "=== [12/20] DONE ==="
+RUN echo "=== [12/20] tigervnc + supervisor ===" && pacman -S --noconfirm --needed tigervnc supervisor && echo "=== [12/20] DONE ==="
 # ---- noVNC Python venv (websockify) ----
 RUN echo "=== [noVNC] Setting up Python venv for websockify ===" && \
     pacman -S --noconfirm --needed python python-pip && \
@@ -54,10 +54,10 @@ RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
 RUN echo "=== [16/20] fuse3 + flatpak + ca-certificates + openssl ===" && pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && echo "=== [16/20] DONE ==="
 
-# ---- 17: Steam + gnome-software (now safe because mesa-git is already installed) ----
-RUN echo "=== [17/20] Steam + gnome-software ===" && \
+# ---- 17: Steam (now safe because mesa-git is already installed) ----
+RUN echo "=== [17/20] Steam ===" && \
     pacman -S --noconfirm --needed libvpl sdl2-compat zimg l-smash libglvnd && \
-    pacman -S --noconfirm --needed steam gnome-software && \
+    pacman -S --noconfirm --needed steam && \
     echo "=== [17/20] DONE ==="
 
 # ---- 17b: 32-bit + Gamemode for optimal Steam + Arc B580 performance ----
@@ -77,7 +77,7 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     # Steam autostart (silent)
     echo '[Desktop Entry]' > /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Type=Application' >> /home/cachyos/.config/autostart/steam.desktop && \
-    echo 'Exec=env MESA_LOADER_DRIVER_OVERRIDE=iris __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 gamemoderun steam -bigpicture -silent -no-cef-sandbox' >> /home/cachyos/.config/autostart/steam.desktop && \
+    echo 'Exec=gamemoderun steam -bigpicture -silent -no-cef-sandbox' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'Hidden=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'NoDisplay=false' >> /home/cachyos/.config/autostart/steam.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/steam.desktop && \
@@ -96,6 +96,7 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
 RUN echo "=== [Flatpak user-level setup] ===" && \
     rm -rf /home/cachyos/.local/share/flatpak/* /home/cachyos/.cache/flatpak/* 2>/dev/null || true && \
     su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
+    su - cachyos -c "flatpak --user install -y flathub dev.lizardbyte.app.Sunshine" && \
     su - cachyos -c "flatpak --user update --appstream" && \
     echo "=== [Flatpak user-level setup] DONE ==="
 
@@ -106,7 +107,14 @@ RUN echo "=== [19/20] Cleanup ===" && \
     echo "=== [19/20] DONE ==="
 
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY vnc-start.sh /usr/local/bin/vnc-start.sh
+COPY xfce-start.sh /usr/local/bin/xfce-start.sh
+COPY pipewire-start.sh /usr/local/bin/pipewire-start.sh
+RUN chmod +x /start.sh /usr/local/bin/vnc-start.sh /usr/local/bin/xfce-start.sh /usr/local/bin/pipewire-start.sh
+
+# Setup supervisor directories
+RUN mkdir -p /var/log/supervisor /etc/supervisor/conf.d
 
 VOLUME ["/home/cachyos", "/mnt/games"]
 EXPOSE 5901 8080 47984-48000/udp

@@ -47,58 +47,17 @@ DBUS_SESSION_BUS_ADDRESS=$(su - ${USER} -c "dbus-daemon --session --fork --print
 export DBUS_SESSION_BUS_ADDRESS
 echo "=== User D-Bus started at ${DBUS_SESSION_BUS_ADDRESS} ==="
 
-# === GPU / Arc B580 - MOVED EARLY BEFORE Xvnc ===
+# === GPU permissions ===
 if [ -d /dev/dri ]; then
     chmod 666 /dev/dri/card* 2>/dev/null || true
     chmod 666 /dev/dri/render* 2>/dev/null || true
     echo "=== GPU devices permissions fixed ==="
 fi
 
-export LIBVA_DRIVER_NAME=iHD
-export MESA_LOADER_DRIVER_OVERRIDE=iris
-export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json
-export __GLX_VENDOR_LIBRARY_NAME=mesa
-export MESA_GL_VERSION_OVERRIDE=4.6
-export MESA_LOADER_DRIVER_OVERRIDE=iris   # double for safety
-echo "=== Arc B580 GPU env set (iHD + iris) ==="
+# === Export env vars for supervisord child processes ===
+export RESOLUTION
+export DEPTH
 
-# === PipeWire stack ===
-su - ${USER} -c "
-    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
-    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
-    export DISABLE_RTKIT=1
-    pipewire
-" &
-sleep 1.5
-
-su - ${USER} -c "
-    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
-    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
-    export DISABLE_RTKIT=1
-    wireplumber
-" &
-sleep 1
-
-su - ${USER} -c "
-    export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
-    export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}
-    export DISABLE_RTKIT=1
-    pipewire-pulse
-" &
-sleep 1
-
-# === noVNC ===
-/opt/noVNC-env/bin/websockify --web=/usr/share/novnc 8080 localhost:5901 &
-sleep 1
-
-# === Xvnc with GLX (now after GPU setup) ===
-su - ${USER} -c "Xvnc :1 -desktop CachyOS -geometry ${RESOLUTION} -depth ${DEPTH} \
-    -rfbauth /home/${USER}/.config/tigervnc/passwd -rfbport 5901 \
-    -localhost no -SecurityTypes VncAuth -extension GLX &"
-sleep 4
-
-# === XFCE desktop (single launch) ===
-su - ${USER} -c "DISPLAY=:1 DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS} startxfce4" &
-
-# Keep container alive
-wait -n
+# === Launch supervisord (manages VNC, XFCE, PipeWire, noVNC) ===
+echo "=== Starting supervisord ==="
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
