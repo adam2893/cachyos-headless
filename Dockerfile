@@ -53,12 +53,6 @@ RUN echo "=== [13/20] GPU extras (libva + intel-media + vulkan) ===" && pacman -
 RUN echo "=== [14/20] curl + wget + git + sudo + nano + vim ===" && pacman -S --noconfirm --needed curl wget git sudo nano vim && echo "=== [14/20] DONE ==="
 RUN echo "=== [15/20] firefox ===" && pacman -S --noconfirm --needed firefox && echo "=== [15/20] DONE ==="
 RUN echo "=== [16/20] fuse3 + flatpak + ca-certificates + openssl ===" && pacman -S --noconfirm --needed fuse3 flatpak ca-certificates-utils openssl && echo "=== [16/20] DONE ==="
-# ---- Flatpak + Flathub (user-level + pre-populate) ----
-RUN echo "=== [Flatpak user-level setup] ===" && \
-    pacman -S --noconfirm --needed flatpak && \
-    su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
-    su - cachyos -c "flatpak --user update --appstream" && \
-    echo "=== [Flatpak user-level setup] DONE ==="
 
 # ---- 17: Steam + gnome-software (now safe because mesa-git is already installed) ----
 RUN echo "=== [17/20] Steam + gnome-software ===" && \
@@ -97,6 +91,12 @@ RUN echo "=== [18/20] User setup + autostart ===" && \
     echo 'X-GNOME-Autostart-enabled=true' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     echo 'Name=Sunshine' >> /home/cachyos/.config/autostart/sunshine.desktop && \
     chown -R cachyos:cachyos /home/cachyos && \
+    
+# ---- Flatpak user-level setup (must run AFTER user is created) ----
+RUN echo "=== [Flatpak user-level setup] ===" && \
+    su - cachyos -c "flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" && \
+    su - cachyos -c "flatpak --user update --appstream" && \
+    echo "=== [Flatpak user-level setup] DONE ==="
     echo "=== [18/20] DONE ==="
 
 # ---- 19: Final cleanup + start script ----
