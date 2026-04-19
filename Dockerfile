@@ -140,9 +140,13 @@ RUN echo "=== [16b/20] Install yay ===" && \
     rm -rf /tmp/yay /home/cachyos/.cache/yay && \
     echo "=== [16b/20] DONE ==="
 
-# ---- 16c: Sunshine (from AUR via yay, like Josh5) ----
-RUN echo "=== [16c/20] Sunshine ===" && \
-    su - cachyos -c "yay -Syu --noconfirm --needed miniupnpc sunshine-bin" && \
+# ---- 16c: Sunshine (build from source on CachyOS — AUR binary needs ICU 76, CachyOS has ICU 78) ----
+RUN echo "=== [16c/20] Sunshine (building from source — this takes a while) ===" && \
+    pacman -S --noconfirm --needed cmake gcc nlohmann-json protobuf libevdev \
+        libdrm libva libvdpau numactl openssl Wayland xdg-utils curl \
+        boost fmt spdlog enet pulseaudio libpipewire \
+        miniupnpc && \
+    su - cachyos -c "yay -Syu --noconfirm --needed sunshine" && \
     setcap cap_sys_admin+p "$(readlink -f $(which sunshine))" && \
     echo "=== [16c/20] DONE ==="
 
