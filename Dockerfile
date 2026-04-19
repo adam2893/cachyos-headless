@@ -140,13 +140,16 @@ RUN echo "=== [16b/20] Install yay ===" && \
     rm -rf /tmp/yay /home/cachyos/.cache/yay && \
     echo "=== [16b/20] DONE ==="
 
-# ---- 16c: Sunshine (build from source on CachyOS — AUR binary needs ICU 76, CachyOS has ICU 78) ----
-RUN echo "=== [16c/20] Sunshine (building from source — this takes a while) ===" && \
-    pacman -S --noconfirm --needed cmake gcc nlohmann-json protobuf libevdev \
-        libdrm libva libvdpau numactl openssl wayland xdg-utils curl \
-        boost fmt spdlog enet pulseaudio libpipewire \
-        miniupnpc && \
-    su - cachyos -c "yay -Syu --noconfirm --needed sunshine" && \
+# ---- 16c: Sunshine (official Arch package from LizardByte releases) ----
+RUN echo "=== [16c/20] Sunshine ===" && \
+    pacman -S --noconfirm --needed libevdev libdrm libva libvdpau numactl openssl \
+        wayland xdg-utils curl boost fmt spdlog enet pulseaudio-alsa \
+        libpipewire miniupnpc && \
+    SUNSHINE_VERSION="2026.417.201619" && \
+    curl -L -o /tmp/sunshine.pkg.tar.zst \
+        "https://github.com/LizardByte/Sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-${SUNSHINE_VERSION}-1-x86_64.pkg.tar.zst" && \
+    pacman -U --noconfirm /tmp/sunshine.pkg.tar.zst && \
+    rm -f /tmp/sunshine.pkg.tar.zst && \
     setcap cap_sys_admin+p "$(readlink -f $(which sunshine))" && \
     echo "=== [16c/20] DONE ==="
 
