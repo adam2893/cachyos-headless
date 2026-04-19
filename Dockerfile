@@ -143,7 +143,7 @@ RUN echo "=== [16b/20] Install yay ===" && \
 # ---- 16c: Sunshine (build from source on CachyOS — AUR binary needs ICU 76, CachyOS has ICU 78) ----
 RUN echo "=== [16c/20] Sunshine (building from source — this takes a while) ===" && \
     pacman -S --noconfirm --needed cmake gcc nlohmann-json protobuf libevdev \
-        libdrm libva libvdpau numactl openssl Wayland xdg-utils curl \
+        libdrm libva libvdpau numactl openssl wayland xdg-utils curl \
         boost fmt spdlog enet pulseaudio libpipewire \
         miniupnpc && \
     su - cachyos -c "yay -Syu --noconfirm --needed sunshine" && \
