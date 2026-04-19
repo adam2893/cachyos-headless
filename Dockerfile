@@ -166,7 +166,7 @@ COPY etc/cont-init.d/*.sh /etc/cont-init.d/
 COPY usr/bin/* /usr/bin/
 COPY templates/ /templates/
 
-RUN chmod +x /etc/cont-init.d/*.sh /usr/bin/start-*.sh /usr/bin/common-functions.sh /usr/bin/xfce4-minimise-all-windows
+RUN chmod +x /etc/cont-init.d/*.sh /usr/bin/start-*.sh /usr/bin/common-functions.sh /usr/bin/xfce4-minimise-all-windows /usr/bin/start-wireplumber.sh /usr/bin/start-pipewire-pulse.sh
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

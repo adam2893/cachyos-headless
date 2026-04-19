@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###
 # File: start-pipewire.sh
-# Description: Start PipeWire audio server
+# Description: Start PipeWire audio server (pipewire daemon only)
+#   WirePlumber and pipewire-pulse are managed as separate supervisor programs
 ###
-set -e
 source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:
@@ -12,7 +12,6 @@ _term() {
 }
 trap _term SIGTERM SIGINT
 
-# EXECUTE PROCESS:
 export XDG_RUNTIME_DIR="/run/user/${PUID:-1000}"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 export DISABLE_RTKIT=1
@@ -29,10 +28,11 @@ while [ ! -d "${XDG_RUNTIME_DIR}" ]; do
     fi
 done
 
-/usr/bin/pipewire -c pipewire-pulse.conf &
+# Start the main PipeWire daemon
+/usr/bin/pipewire &
 pipewire_pid=$!
 
-echo "PipeWire started"
+echo "PipeWire daemon started (PID: $pipewire_pid)"
 
 # WAIT FOR CHILD PROCESS:
 wait "$pipewire_pid"

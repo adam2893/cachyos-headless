@@ -56,6 +56,21 @@ wait_for_desktop_dbus_session() {
     done
 }
 
+# Wait for PipeWire daemon to be ready (socket exists)
+wait_for_pipewire() {
+    MAX=30
+    CT=0
+    while [ ! -S "${XDG_RUNTIME_DIR}/pipewire-0" ]; do
+        sleep 0.50s
+        CT=$(( CT + 1 ))
+        if [ "$CT" -ge "$MAX" ]; then
+            echo "FATAL: Gave up waiting for PipeWire daemon socket"
+            exit 11
+        fi
+    done
+    echo "PipeWire daemon is ready"
+}
+
 # Print colored headers
 print_header() {
     echo -e "\e[35m**** ${@} ****\e[0m"
